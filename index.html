@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plinko</title>
+    <meta name="description" content="Plinko: a free play-money Plinko game with adjustable risk, 8 to 16 rows, stats and a drop simulator. No real money.">
+    <meta name="theme-color" content="#0f1115">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Plinko">
+    <meta property="og:description" content="A free play-money Plinko game. Pick your risk and rows, drop the ball, track your stats.">
+    <!-- After deploying, add: <meta property="og:url" content="https://YOURNAME.github.io/plinko/"> -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen selection:bg-indigo-500/30">
+
+    <div class="mx-auto max-w-5xl min-[1800px]:max-w-none px-4 py-8">
+      <div class="flex flex-col gap-10 min-[1800px]:flex-row min-[1800px]:items-start min-[1800px]:gap-8">
+        <!-- Plinko block (same size as before: 992px wide on large screens) -->
+        <div class="w-full min-[1800px]:w-[992px] min-[1800px]:flex-none">
+        <div class="flex flex-col gap-8 md:flex-row md:items-start">
+            
+            <!-- Controls Panel -->
+            <div class="w-full md:w-72 md:flex-none">
+                <div class="mb-6 flex items-baseline justify-between">
+                    <h1 class="text-3xl font-bold tracking-tight text-white">Plinko</h1>
+                    <div class="text-right">
+                        <div class="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+                            Balance
+                        </div>
+                        <div id="balance-display" class="font-mono text-xl font-bold text-indigo-400">
+                            …
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4 flex gap-2">
+                    <button id="add-money-btn" title="Adds ₡25,000 to your balance" class="flex-1 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 active:bg-emerald-700">+ Add $</button>
+                    <button id="stats-btn" class="flex-1 rounded-md bg-neutral-800 px-3 py-2 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-neutral-700 transition-colors hover:bg-neutral-700">Stats</button>
+                    <button id="reset-balance-btn" title="Sets your balance to ₡0" class="flex-1 rounded-md bg-neutral-800 px-3 py-2 text-sm font-semibold text-red-400 ring-1 ring-inset ring-neutral-700 transition-colors hover:bg-neutral-700">Reset $</button>
+                    <button id="sound-btn" title="Toggle sound" aria-label="Toggle sound" class="flex-none rounded-md bg-neutral-800 px-3 py-2 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-neutral-700 transition-colors hover:bg-neutral-700">🔊</button>
+                </div>
+
+                <div id="settings-panel" class="space-y-5 rounded-xl bg-neutral-900 p-5 ring-1 ring-white/5 transition-opacity duration-200">
+                    <div>
+                        <span class="mb-2 block text-xs uppercase tracking-wide text-gray-400 font-semibold">Risk</span>
+                        <div class="flex w-full overflow-hidden rounded-lg bg-neutral-800 p-1" id="risk-controls">
+                            <button data-value="low" class="segmented-btn flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-neutral-400 active">Low</button>
+                            <button data-value="medium" class="segmented-btn flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-neutral-400">Medium</button>
+                            <button data-value="high" class="segmented-btn flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-neutral-400">High</button>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="mb-2 block text-xs uppercase tracking-wide text-gray-400 font-semibold">Rows</span>
+                        <div class="flex w-full flex-nowrap overflow-hidden rounded-lg bg-neutral-800 p-1 gap-0.5" id="row-controls">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="mb-1 block text-xs uppercase tracking-wide text-gray-500">Wager Amount</label>
+                    <div class="flex gap-2">
+                    <div class="relative min-w-0 flex-1 rounded-md shadow-sm">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <span class="text-gray-400 sm:text-sm">₡</span>
+                        </div>
+                        <input
+                            type="text"
+                            id="wager-input"
+                            value="1.00"
+                            class="block w-full rounded-md border-0 bg-neutral-800 py-2 pl-7 pr-12 text-white ring-1 ring-inset ring-neutral-700 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-all"
+                            placeholder="1.00"
+                        />
+                    </div>
+                    <button id="half-btn" type="button" class="rounded-md bg-neutral-800 px-4 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-neutral-700 transition-colors hover:bg-neutral-700 active:bg-neutral-600">½</button>
+                    <button id="double-btn" type="button" class="rounded-md bg-neutral-800 px-4 text-sm font-semibold text-gray-200 ring-1 ring-inset ring-neutral-700 transition-colors hover:bg-neutral-700 active:bg-neutral-600">2x</button>
+                    </div>
+                </div>
+                
+                <p id="limits-display" class="mt-2 text-xs font-medium text-gray-500 opacity-0 transition-opacity">
+                    Min ₡0.10 • Max ₡∞
+                </p>
+
+                <button
+                    id="drop-button"
+                    disabled
+                    class="mt-6 flex w-full items-center justify-center rounded-md px-4 py-3 text-base font-semibold shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 bg-indigo-600 text-white hover:bg-indigo-500 focus-visible:outline-indigo-600 disabled:bg-neutral-800 disabled:text-neutral-500 shadow-indigo-600/20 shadow-lg"
+                >
+                    Loading…
+                </button>
+
+                <button
+                    id="auto-button"
+                    type="button"
+                    disabled
+                    class="mt-3 flex w-full items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold ring-1 ring-inset ring-neutral-700 transition-colors bg-neutral-800 text-gray-200 hover:bg-neutral-700 disabled:text-neutral-500 disabled:hover:bg-neutral-800"
+                >
+                    Auto Drop
+                </button>
+
+                <p id="error-message" class="mt-3 text-sm text-red-400 hidden"></p>
+
+            </div>
+
+            <!-- Canvas Render Panel -->
+            <div id="canvas-container" class="w-full min-w-0 md:flex-1 rounded-2xl bg-black/40 shadow-2xl ring-1 ring-white/5 overflow-hidden flex items-center justify-center p-2 relative h-[300px] md:h-auto">
+                <canvas id="plinko-canvas" class="block w-full h-full rounded-xl absolute inset-2" style="width: calc(100% - 1rem); height: calc(100% - 1rem);"></canvas>
+            </div>
+
+        </div>
+
+        <!-- Music player -->
+        <div id="mp" class="mt-8 rounded-2xl bg-neutral-900 p-4 ring-1 ring-white/5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                <div id="mp-cover" class="flex h-14 w-14 flex-none items-center justify-center overflow-hidden rounded-lg bg-neutral-800 text-xl text-gray-500 ring-1 ring-white/5">&#9834;</div>
+                <div class="min-w-0">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Music</div>
+                    <div id="mp-title" class="truncate text-sm font-semibold text-white">Loading…</div>
+                    <div id="mp-artist" class="truncate text-xs text-gray-400">&nbsp;</div>
+                </div>
+                </div>
+                <div class="flex flex-none items-center gap-1">
+                    <button id="mp-shuffle" type="button" title="Shuffle" aria-label="Shuffle" class="rounded-md p-2 text-gray-300 transition-colors hover:bg-white/10"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
+                    <button id="mp-prev" type="button" title="Previous" aria-label="Previous" class="rounded-md p-2 text-gray-300 transition-colors hover:bg-white/10"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg></button>
+                    <button id="mp-play" type="button" title="Play" aria-label="Play" class="rounded-full bg-indigo-600 p-2.5 text-white transition-colors hover:bg-indigo-500"></button>
+                    <button id="mp-next" type="button" title="Next" aria-label="Next" class="rounded-md p-2 text-gray-300 transition-colors hover:bg-white/10"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+                    <button id="mp-repeat" type="button" title="Repeat: off" aria-label="Repeat" class="flex items-center rounded-md p-2 text-gray-300 transition-colors hover:bg-white/10"></button>
+                </div>
+            </div>
+            <div class="mt-3 flex items-center gap-2 font-mono text-[11px] text-gray-400">
+                <span id="mp-cur">0:00</span>
+                <input id="mp-seek" type="range" min="0" max="1000" value="0" class="h-1 min-w-0 flex-1 cursor-pointer accent-indigo-500" aria-label="Seek" />
+                <span id="mp-dur">0:00</span>
+                <input id="mp-vol" type="range" min="0" max="100" value="80" class="hidden h-1 w-20 cursor-pointer accent-indigo-500 sm:block" aria-label="Volume" />
+            </div>
+            <iframe id="mp-frame" title="Audio" aria-hidden="true" tabindex="-1" allow="autoplay; encrypted-media" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A2190468044&amp;auto_play=false&amp;hide_related=true&amp;show_comments=false&amp;show_user=false&amp;show_reposts=false&amp;show_teaser=false&amp;visual=false"></iframe>
+        </div>
+        </div>
+
+        <!-- Kick: top right on large screens, below the game on smaller ones -->
+        <section id="kick-section" class="w-full min-w-0 min-[1800px]:flex-1">
+            <!-- Kick stream + chat -->
+            <div id="kick-grid" class="relative grid gap-3 md:grid-cols-[minmax(0,1fr)_18rem]">
+                <div class="min-w-0">
+                    <div class="aspect-video w-full overflow-hidden rounded-xl bg-black/40 ring-1 ring-white/5">
+                        <div id="kick-player-slot" class="flex h-full w-full items-center justify-center px-4 text-center text-sm text-gray-500">
+                            Search a streamer below to load their stream and chat.
+                        </div>
+                    </div>
+
+                <!-- Kick search -->
+                <div class="mt-3">
+                    <div class="min-w-0">
+                        <form id="kick-search-form" class="flex w-full gap-2" autocomplete="off">
+                            <input
+                                id="kick-search-input"
+                                type="text"
+                                placeholder="Search a streamer (e.g. xqc)"
+                                maxlength="60"
+                                class="min-w-0 flex-1 rounded-md border-0 bg-neutral-800 px-3 py-2 text-sm text-white ring-1 ring-inset ring-neutral-700 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-emerald-500"
+                            />
+                            <button type="submit" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-500">Watch</button>
+                            <button type="button" id="kick-clear-btn" class="hidden rounded-md bg-neutral-800 px-3 py-2 text-sm font-semibold text-gray-300 ring-1 ring-inset ring-neutral-700 hover:bg-neutral-700">Close</button>
+                            <button type="button" id="kick-chat-toggle" class="whitespace-nowrap rounded-md bg-neutral-800 px-3 py-2 text-sm font-semibold text-gray-300 ring-1 ring-inset ring-neutral-700 hover:bg-neutral-700">Hide chat</button>
+                            <button type="button" id="streamers-btn" class="whitespace-nowrap rounded-md bg-neutral-800 px-3 py-2 text-sm font-semibold text-gray-300 ring-1 ring-inset ring-neutral-700 hover:bg-neutral-700">Streamers</button>
+                        </form>
+                        <p id="kick-error" class="mt-2 hidden text-sm text-red-400"></p>
+                    </div>
+                </div>
+                </div>
+                <div id="kick-chat-box" class="h-[500px] overflow-hidden rounded-xl bg-black/40 ring-1 ring-white/5 md:h-auto md:min-h-[400px]">
+                    <div id="kick-chat-slot" class="flex h-full w-full items-center justify-center px-4 text-center text-sm text-gray-500">
+                        Chat will appear here.
+                    </div>
+                </div>
+
+                <!-- Streamers panel: sits over the Kick stream/chat area only (never over the game) -->
+                <div id="streamers-modal" class="absolute inset-0 z-20 hidden flex-col rounded-xl bg-neutral-950/95 p-3 ring-1 ring-white/10 backdrop-blur-sm">
+                    <div class="mb-2 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-semibold text-white">Live now</h2>
+                            <span id="streamers-count" class="rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-semibold text-red-400"></span>
+                            <span id="streamers-status" class="text-xs text-gray-500"></span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button id="streamers-refresh" title="Refresh" aria-label="Refresh" class="rounded-md px-2 py-1 text-sm leading-none text-gray-400 hover:bg-white/10 hover:text-white disabled:opacity-40">&#8635;</button>
+                            <button id="streamers-close" title="Close" aria-label="Close" class="rounded-md px-2 py-1 text-xl leading-none text-gray-400 hover:bg-white/10 hover:text-white">&times;</button>
+                        </div>
+                    </div>
+                    <div id="streamers-list" class="grid min-h-0 flex-1 grid-cols-1 content-start gap-1.5 overflow-y-auto sm:grid-cols-2 xl:grid-cols-3"></div>
+                </div>
+            </div>
+
+            <!-- Stats panel (opens under the Kick stream) -->
+            <div id="stats-modal" class="hidden flex-col mt-3">
+                <div class="w-full rounded-xl bg-neutral-900 p-3 ring-1 ring-white/10">
+                    <div class="mb-2 flex items-center justify-between">
+                        <h2 class="text-base font-bold text-white">Stats</h2>
+                        <button id="stats-close" class="rounded-md px-2 py-1 text-xl leading-none text-gray-400 hover:bg-neutral-800 hover:text-white">&times;</button>
+                    </div>
+                    <div id="stats-body" class="grid grid-cols-1 gap-x-6 text-xs sm:grid-cols-2"></div>
+                    <div class="mt-3 border-t border-white/10 pt-2">
+                        <div class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Simulate drops (adds to stats)</div>
+                        <div class="grid grid-cols-2 items-end gap-2 sm:grid-cols-5">
+                            <label class="block text-xs text-gray-400">Bet
+                                <input id="sim-bet" type="number" min="0" step="any" class="mt-0.5 block w-full min-w-0 rounded-md border-0 bg-neutral-800 px-2 py-1 text-xs text-white ring-1 ring-inset ring-neutral-700 focus:ring-2 focus:ring-inset focus:ring-emerald-500" />
+                            </label>
+                            <label class="block text-xs text-gray-400">Drops
+                                <input id="sim-drops" type="number" min="1" max="100000000" step="1" value="1000000" class="mt-0.5 block w-full min-w-0 rounded-md border-0 bg-neutral-800 px-2 py-1 text-xs text-white ring-1 ring-inset ring-neutral-700 focus:ring-2 focus:ring-inset focus:ring-emerald-500" />
+                            </label>
+                            <label class="block text-xs text-gray-400">Risk
+                                <select id="sim-risk" class="mt-0.5 block w-full min-w-0 rounded-md border-0 bg-neutral-800 px-2 py-1 text-xs text-white ring-1 ring-inset ring-neutral-700 focus:ring-2 focus:ring-inset focus:ring-emerald-500">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </label>
+                            <label class="block text-xs text-gray-400">Rows
+                                <select id="sim-rows" class="mt-0.5 block w-full min-w-0 rounded-md border-0 bg-neutral-800 px-2 py-1 text-xs text-white ring-1 ring-inset ring-neutral-700 focus:ring-2 focus:ring-inset focus:ring-emerald-500"></select>
+                            </label>
+                            <button id="sim-run" class="rounded-md bg-emerald-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50">Run</button>
+                        </div>
+                        <p id="sim-status" class="mt-1 min-h-[1rem] text-xs text-gray-400"></p>
+                    </div>
+                    <button id="stats-reset" class="mt-2 w-full rounded-md bg-neutral-800 px-3 py-1.5 text-xs font-semibold text-red-400 ring-1 ring-inset ring-neutral-700 hover:bg-neutral-700">Reset Stats</button>
+                </div>
+            </div>
+
+        </section>
+      </div>
+    </div>
+
+    <footer class="mx-auto max-w-5xl px-4 pb-10 text-center text-xs leading-relaxed text-gray-500">
+        <p>Play money only. &#8353; is a fictional currency with no cash value, and nothing here can be bought, cashed out or withdrawn. This is a free simulation for entertainment, not a gambling service.</p>
+        <p class="mt-1">Not affiliated with any casino, brand or streamer. Stream embeds are provided by Kick and belong to their creators.</p>
+    </footer>
+
+    <script src="game.js"></script>
+
+    <script src="kick.js"></script>
+
+
+    <script src="music.js"></script>
+
+</body>
+</html>
