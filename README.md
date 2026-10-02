@@ -15,11 +15,6 @@ A free, play-money Plinko game that runs entirely in your browser. Pick a risk l
 - Drop simulator that adds up to 100 million simulated drops to your stats in the background
 - Optional sound effects, a music player, and a Kick stream and chat embed
 
-## Run it
-
-No build step. Open `index.html` in a browser, or serve the folder:
-
-
 ## How the math works
 
 Each ball makes one left or right choice per row, so the landing bucket follows a binomial distribution. Bucket payouts grow exponentially toward the edges (base 1.88, 2.68 or 4.21 for Low, Medium and High), then all multipliers are scaled so the long-run return is **99%**. Payouts are rounded down to whole cents, so the effective return is slightly lower at very small bets.
