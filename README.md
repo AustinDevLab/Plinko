@@ -2,7 +2,7 @@
 
 A free, play-money Plinko game that runs entirely in your browser. Pick a risk level and number of rows, drop the ball, and watch your stats build up.
 
-**[Play it live](https://YOURNAME.github.io/plinko/)** <!-- update after enabling GitHub Pages -->
+**[Play it live](https://AustinDevLab.github.io/plinko/)** <!-- update after enabling GitHub Pages -->
 
 > **Play money only.** The currency (₡) is fictional, has no cash value, and cannot be cashed out. This is a simulation for entertainment, not a gambling service, and it is not affiliated with any casino or brand.
 
@@ -19,15 +19,6 @@ A free, play-money Plinko game that runs entirely in your browser. Pick a risk l
 
 No build step. Open `index.html` in a browser, or serve the folder:
 
-```bash
-python3 -m http.server 8000
-```
-
-## Deploy on GitHub Pages
-
-1. Push these files to a repo.
-2. Go to **Settings, Pages**, choose the `main` branch and the `/ (root)` folder, then save.
-3. Your site appears at `https://YOURNAME.github.io/REPO/`.
 
 ## How the math works
 
